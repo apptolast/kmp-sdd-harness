@@ -1,7 +1,7 @@
 ---
 name: revenuecat-iap
-description: Úsala al integrar compras in-app (IAP) en un proyecto KMP de AppToLast con RevenueCat KMP 3.1.0 — cuando implementes "quitar publicidad"/remove_ads, un entitlement que desbloquee funciones premium, restaurar compras, o cablear el flag ads_removed. Cubre el source-set mobileMain (solo Android+iOS, sin wasmJs), el expect/actual de la API key, la config de Purchases, comprar/restaurar y las keys públicas por BuildKonfig.
-version: 0.1.0
+description: Úsala al integrar compras in-app (IAP) en un proyecto KMP de AppToLast con RevenueCat KMP 3.1.0 — cuando implementes "quitar publicidad"/remove_ads, un entitlement que desbloquee funciones premium, restaurar compras, cablear el flag ads_removed, o enlazar la identidad de RevenueCat con el uid de Firebase (logIn/logOut). Cubre el source-set mobileMain (solo Android+iOS, sin wasmJs), el expect/actual de la API key, la config de Purchases, comprar/restaurar, las keys públicas por BuildKonfig, y el port de identidad IAP (logIn(firebaseUid)/logOut()).
+version: 0.2.0
 ---
 
 # Receta: IAP con RevenueCat KMP (remove_ads)
@@ -67,7 +67,7 @@ fun initializeRevenueCat() {
         .onFailure { log.e(it) { "Purchases.configure threw — IAP disabled this session" } }
 }
 ```
-No se pasa `appUserId`: el SDK crea un `$RCAnonymousID` anónimo. Al habilitar login, llamar `Purchases.sharedInstance.logIn(firebaseUid)` desde el orquestador de auth y `logOut()` al cerrar sesión.
+No se pasa `appUserId`: el SDK crea un `$RCAnonymousID` anónimo, que se **aliasa** a la cuenta al llamar `logIn(uid)` (ver §7). **Nunca** pases tu propio `appUserId` en `configure` — es un anti-patrón que rompe el aliasing y bloquea el enlace posterior con el uid de Firebase.
 
 ### 4. El servicio IAP: comprar, restaurar, sincronizar (`IapService` en commonMain)
 `RevenueCatIapService(settingsStorage, analytics)` implementa `IapService` y vive en `mobileMain`. Constantes: entitlement `"InemSellar Pro"`, producto `"remove_ads"`. Usa las extensiones ktx suspend (`awaitOfferings`, `awaitPurchase`, `awaitRestore`, `awaitCustomerInfo`).
@@ -117,6 +117,40 @@ single<IapService> { RevenueCatIapService(get(), get()) }
 single<IapService> { NoOpIapService() }   // web: no hay store
 ```
 
+### 7. Enlazar la identidad con el uid de Firebase (`logIn`/`logOut`)
+Para que las compras sigan al usuario entre dispositivos/reinstalaciones (y no queden atadas al `$RCAnonymousID` del dispositivo), enlaza la identidad de RevenueCat con el **uid de Firebase**. Como `:shared` no puede depender del SDK (vive solo en `mobileMain`), usa un **port lambda** `(String?) -> Unit` inyectado en el `AuthOrchestrator` de `:shared` — mismo molde que `setCrashlyticsUserId` de Crashlytics. `uid != null` ⇒ `logIn(uid)`; `null` ⇒ `logOut()`.
+
+```kotlin
+// consumerApp/commonMain/…/data/local/RevenueCatUserId.kt
+expect fun setRevenueCatUserId(uid: String?)
+
+// mobileMain/…/RevenueCatUserId.mobile.kt (android+ios) — API callback, fire-and-forget
+actual fun setRevenueCatUserId(uid: String?) {
+    if (!Purchases.isConfigured) return
+    runCatching {
+        if (uid != null) Purchases.sharedInstance.logIn(uid, onError = { log.w { "$it" } }, onSuccess = { _, _ -> })
+        else Purchases.sharedInstance.logOut(onError = { log.w { "$it" } }, onSuccess = {})
+    }.onFailure { log.w(it) { "setRevenueCatUserId threw" } }
+}
+
+// wasmJsMain/…/RevenueCatUserId.wasmJs.kt
+actual fun setRevenueCatUserId(uid: String?) = Unit
+```
+
+Inyéctalo en el orquestador como una lambda más (Koin **no resuelve lambdas** → `single{}` manual con `::`):
+```kotlin
+class AuthOrchestrator(/*…*/ private val setRevenueCatUserId: (String?) -> Unit = {})
+// AuthModule (:consumerApp)
+single { AuthOrchestrator(get(), get(), get(), setCrashUserId = ::setCrashlyticsUserId, setRevenueCatUserId = ::setRevenueCatUserId) }
+```
+
+**Regla de enganche (clave):** invócalo **explícitamente en cada transición**, NO en el colector `init { _state.collect { } }`:
+- `signInWithEmail`/`registerWithEmail`/`signInWithGoogle`/`signInWithApple` ⇒ `logIn(uid)` **solo si** el estado resultante es `Registered`.
+- `signOut`/`deleteAccount` ⇒ `logOut()` (`setRevenueCatUserId(null)`).
+- `bootstrap` (arranque anónimo o restaurando sesión) ⇒ **nada** — el SDK persiste el appUserId entre lanzamientos.
+
+Es el patrón general **"platform-effect port keyed by auth-state"**: cualquier SDK de plataforma que deba reaccionar a la identidad del usuario (RevenueCat, Crashlytics, Analytics…) se inyecta así en el orquestador de `:shared`.
+
 ## Gotchas
 - **`product_not_in_offering`**: la causa nº1. En el dashboard de RevenueCat el producto `remove_ads` debe estar **adjunto a un Package dentro de la Offering *current***, o `awaitOfferings()` no lo encuentra. No basta con crear el producto.
 - **Solo `mobileMain`**: nunca importes tipos `com.revenuecat.purchases.kmp.*` desde `commonMain`/`wasmJsMain` — no compila. La interfaz `IapService` va en commonMain; el impl RC en mobileMain; web recibe `NoOpIapService`.
@@ -124,6 +158,7 @@ single<IapService> { NoOpIapService() }   // web: no hay store
 - **DEVELOPER_ERROR en Android**: el keystore de firma debe coincidir con la upload key de Play Console; con otra, el AAB rechaza los flujos de IAP/license-tester. Prueba compras en un track interno/cerrado + license tester (Android) o TestFlight + sandbox (iOS).
 - **Cancelar ≠ error**: comprueba `PurchasesTransactionException.userCancelled` antes de tratar la excepción como fallo, o mostrarás un error cuando el usuario simplemente cerró la hoja de compra.
 - **`amountMicros`**: el precio para analytics viene en micros (1_000_000 micros = 1 unidad); divide antes de loguear el evento `purchase`.
+- **Identidad: engancha por transición, no por colector**: dispara `logIn(uid)`/`logOut()` en los métodos de transición del orquestador (ver §7), NO reaccionando al `StateFlow` de auth — si no, se dispara con el uid anónimo del bootstrap y no distingues bootstrap de sign-out. Envuelve la llamada en `runCatching` para que un fallo del SDK no convierta la auth en `Result.failure`.
 
 ---
-Fuente: inemsellar — `consumerApp/src/mobileMain/.../data/local/{RevenueCatConfig.kt,RevenueCatInitializer.kt,RevenueCatIapService.kt}`, `consumerApp/src/{androidMain,iosMain}/.../data/local/RevenueCatConfig.{android,ios}.kt`, `shared/src/commonMain/.../data/local/SettingsStorage.kt`, `consumerApp/build.gradle.kts` (mobileMain), `consumerApp/src/{androidMain,iosMain,wasmJsMain}/.../di/PlatformModule.*.kt`.
+Fuente: inemsellar — `consumerApp/src/mobileMain/.../data/local/{RevenueCatConfig.kt,RevenueCatInitializer.kt,RevenueCatIapService.kt}`, `consumerApp/src/{androidMain,iosMain}/.../data/local/RevenueCatConfig.{android,ios}.kt`, `shared/src/commonMain/.../data/local/SettingsStorage.kt`, `consumerApp/build.gradle.kts` (mobileMain), `consumerApp/src/{androidMain,iosMain,wasmJsMain}/.../di/PlatformModule.*.kt`. Identity linking (§7, spec 001): `consumerApp/src/{commonMain,mobileMain,wasmJsMain}/.../data/local/RevenueCatUserId*.kt`, `shared/src/commonMain/.../domain/auth/AuthOrchestrator.kt`, `consumerApp/src/commonMain/.../di/AuthModule.kt`.
