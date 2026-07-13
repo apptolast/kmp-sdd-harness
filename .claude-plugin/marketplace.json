@@ -1,0 +1,24 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "kmp-sdd-harness",
+  "description": "Harness SDD reutilizable para proyectos KMP de AppToLast: flujo spec->plan->diseno->test->implementacion->validacion (TDD estricto, 4 gates humanos) + recetario canonico de integraciones.",
+  "owner": {
+    "name": "AppToLast"
+  },
+  "plugins": [
+    {
+      "name": "sdd-flow",
+      "description": "Flujo SDD para KMP/CMP: 7 slash commands, 5 subagentes en contexto aislado, hooks (lock TDD de tests + captura a engram).",
+      "author": { "name": "AppToLast" },
+      "source": "./plugins/sdd-flow",
+      "category": "development"
+    },
+    {
+      "name": "kmp-recipes",
+      "description": "Recetario canonico de integraciones KMP (RevenueCat, Firebase-REST, auth Google/Apple, fastlane, navegacion, i18n, WebView, testing...).",
+      "author": { "name": "AppToLast" },
+      "source": "./plugins/kmp-recipes",
+      "category": "development"
+    }
+  ]
+}

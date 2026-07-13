@@ -1,0 +1,29 @@
+{
+  "description": "sdd-flow: PreToolUse bloquea editar tests durante /implement (lock TDD fase 1). PostToolUse captura fallos de build/test a engram (memoria viva).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/block-test-edits.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/capture-to-engram.py\"",
+            "timeout": 12
+          }
+        ]
+      }
+    ]
+  }
+}

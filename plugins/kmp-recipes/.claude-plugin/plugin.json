@@ -1,0 +1,6 @@
+{
+  "name": "kmp-recipes",
+  "version": "0.1.0",
+  "description": "Recetario canonico de integraciones y patrones KMP de AppToLast, sembrado desde proyectos existentes (inemsellar, AllergenGuard, BaseLogin, GreenhouseFronts, SpainDecides, LifetimeJournal). Capa canonica del modelo de memoria de 2 capas (la capa viva es engram).",
+  "author": { "name": "AppToLast" }
+}

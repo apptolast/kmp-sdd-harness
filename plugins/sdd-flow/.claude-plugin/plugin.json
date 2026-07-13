@@ -1,0 +1,6 @@
+{
+  "name": "sdd-flow",
+  "version": "0.1.0",
+  "description": "Flujo SDD (Spec-Driven Development) para proyectos KMP/CMP de AppToLast. TDD estricto test-first con 7 fases y 4 gates humanos, 5 subagentes y hooks de enforcement + captura a engram.",
+  "author": { "name": "AppToLast" }
+}
