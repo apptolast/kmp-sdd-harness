@@ -1,17 +1,14 @@
 ---
-description: "SDD 5/7 — hace pasar los tests a verde. NO puede tocar los tests (un hook lo bloquea)."
-argument-hint: "(usa el spec activo)"
-allowed-tools: ["Task", "Read", "Grep", "Glob", "Bash"]
+description: Paso SDD 3. Ejecuta un specs/<slug>/tasks.md aprobado, una tarea cada vez, con TDD estricto y refactorizando el código que toca. Úsalo para construir una feature cuando sus tareas están aprobadas, o cuando pidan implementar una tarea o una feature.
+argument-hint: <JIRA-ID | slug> [id de tarea]
+allowed-tools: Agent, Task, Read, Grep, Glob, Bash
 ---
+<!-- Generado por scripts/render.sh desde src/. Edita la fuente, no este fichero. -->
 
-# /implement — A verde
+Ejecuta el paso SDD **implement** para `$ARGUMENTS`.
 
-```!
-bash "${CLAUDE_PLUGIN_ROOT}/scripts/sdd-state.sh" set-phase implement
-```
-
-> A partir de aquí el hook **bloquea** cualquier edición de ficheros de test (lock TDD, fase 1 sin mutabilidad).
-
-1. Lanza el subagente **implementer** (Task) para implementar el código de **producción** hasta que **todos los tests pasen a verde**, siguiendo `specs/<NNN-slug>/plan.md` y los Guardarraíles KMP (clean architecture, Koin, expect/actual, state hoisting, sin `runBlocking`/`GlobalScope`).
-2. **No modifica tests.** Si un test parece incorrecto, **para y avisa** (no lo cambies): se resuelve volviendo a `/test`.
-3. Ejecuta los tests hasta verde y deja el árbol compilando en todas las plataformas afectadas. El usuario continúa con `/validate`.
+1. Resuelve `specs/<slug>/` con el primer argumento; un segundo argumento opcional indica una sola tarea.
+2. Comprueba la línea `Estado:` de `tasks.md` con una búsqueda: si no es `aprobado` ni `en-curso`, para.
+3. Pásale el slug y la tarea al subagente `sdd-flow:implement`; él lee lo que necesita. No cargues los documentos
+   en esta conversación.
+4. Transmite qué tareas quedan marcadas, qué dijeron los checks y qué no se comprobó.
