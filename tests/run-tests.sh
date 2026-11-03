@@ -3,6 +3,10 @@
 # Dependency-free test suite for the harness: render, spec-lint, init, gradle-signal and hooks.
 #
 #   ./tests/run-tests.sh
+#
+# SC2015: `cond && ok || bad` is safe here, ok/bad never fail. SC2016: the single-quoted `$` and
+# backticks are literal test input (spec markdown, shell commands for the hooks), not expansions.
+# shellcheck disable=SC2015,SC2016
 
 set -uo pipefail
 
