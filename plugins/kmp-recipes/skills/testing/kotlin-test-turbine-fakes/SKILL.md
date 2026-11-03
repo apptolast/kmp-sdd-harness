@@ -1,6 +1,6 @@
 ---
 name: kotlin-test-turbine-fakes
-description: Úsala al escribir tests en proyectos KMP/CMP de AppToLast — cuando traduzcas criterios Gherkin a tests, testees ViewModels o Flows/StateFlow, o necesites fakes. Define el patrón de test estándar de la flota: kotlin.test puro + Turbine + kotlinx-coroutines-test + fakes escritos a mano (sin Kotest, sin MockK), con la estructura Given/When/Then.
+description: Úsala al escribir tests en proyectos KMP/CMP de AppToLast — cuando traduzcas los criterios de aceptación del spec (AC#) a tests, testees ViewModels o Flows/StateFlow, o necesites fakes. Define el patrón de test estándar de la flota: kotlin.test puro + Turbine + kotlinx-coroutines-test + fakes escritos a mano (sin Kotest, sin MockK), con la estructura Given/When/Then.
 version: 0.1.0
 ---
 
@@ -9,7 +9,7 @@ version: 0.1.0
 Patrón de test **canónico** de los proyectos KMP de AppToLast. Fuente: `BaseLogin :custom-login` (suite más completa de la org) e inemsellar `consumerApp/commonTest`.
 
 ## Cuándo usarla
-- Al traducir `Scenario [AC-xx]` (Gherkin del spec) a tests (`tdd-test-writer`).
+- Al traducir los criterios `AC#` del spec (`CUANDO … ENTONCES …`) a tests en el paso `implement` de sdd-flow.
 - Al testear ViewModels, casos de uso, mappers o `Flow`/`StateFlow`.
 - Al necesitar dobles de test (repos, servicios, ports de plataforma).
 
@@ -34,7 +34,7 @@ class FeatureViewModelTest {
     @AfterTest fun tearDown() { Dispatchers.resetMain() }
 
     @Test
-    fun `AC-01 al ocurrir X el estado pasa a Success`() = runTest {
+    fun `AC1 cuando ocurre X el estado pasa a Success`() = runTest {
         // Given
         val repo = FakeFeatureRepository(items = listOf(sampleItem()))
         val vm = FeatureViewModel(repo)
@@ -75,6 +75,6 @@ class FakeIapIdentity : IapIdentity {
 ```
 
 ## Reglas TDD del harness
-- Un test (o pocos) **por `AC-xx`**, con el AC en el nombre backtick.
-- El test se escribe **en rojo** en `/test` y es **inmutable** en `/implement` (fase 1). El `implementer` no lo toca.
+- Un test (o pocos) **por `AC#`**, con el AC en el nombre backtick.
+- El test se escribe y se ejecuta **en rojo** antes del código, tarea a tarea (`implement`). Nunca se debilita, se borra ni se ajusta para conseguir el verde; si está mal, se corrige con `/sdd-flow:change`.
 - Estructura **Given/When/Then** visible dentro de cada test.

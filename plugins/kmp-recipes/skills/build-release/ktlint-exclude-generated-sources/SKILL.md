@@ -35,7 +35,7 @@ ktlint = disabled
 Con eso, `ktlintCheck` y `ktlintFormat` saltan todo lo generado. Opcionalmente, deja también el `filter { exclude { it.file.path.contains("/build/") } }` en el `configure<KtlintExtension>` como cinturón-y-tirantes para el check.
 
 ## Regla de CI/gate
-El gate de calidad (CI, `/validate`) debe correr **`ktlintCheck`**, nunca `ktlintFormat` — `check` es idempotente y no reescribe ficheros. Con el `.editorconfig` de arriba, `ktlintFormat` también queda usable en local.
+El gate de calidad (CI, `converge` de sdd-flow) debe correr **`ktlintCheck`**, nunca `ktlintFormat` — `check` es idempotente y no reescribe ficheros. Con el `.editorconfig` de arriba, `ktlintFormat` también queda usable en local.
 
 ## Gotcha adyacente: conflicto `androidx.concurrent:concurrent-futures`
 En algunos proyectos las tareas de ktlint/androidTest fallan al resolver `debugAndroidTestCompileClasspath` por un conflicto `androidx.concurrent:concurrent-futures` (1.1.0 estricta vs 1.2.0 transitiva vía `androidx.test.ext:junit:1.3.0`). Fuerza la versión:
