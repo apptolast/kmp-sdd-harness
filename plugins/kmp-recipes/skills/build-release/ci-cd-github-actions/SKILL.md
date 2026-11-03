@@ -93,7 +93,7 @@ Node 20, `npm ci --prefix functions`, escribe `functions/.env` (`ADMIN_EMAILS`) 
 ```
 
 ## Gotchas
-- **NO hay quality gate en CI.** Ningún workflow corre `test`, `ktlintFormat` ni `check`. La calidad se valida **localmente** (el `/validate` del harness lo compensa); no confíes en el CI para atrapar tests rojos o lint.
+- **NO hay quality gate en CI.** Ningún workflow corre `test`, `ktlintFormat` ni `check`. La calidad se valida **localmente** (el paso `converge` de sdd-flow lo compensa); no confíes en el CI para atrapar tests rojos o lint.
 - **Casi todos los triggers `push` están comentados.** Web y functions son `workflow_dispatch`-only (los bloques `push:` están en comentarios); solo Android/iOS reaccionan de verdad a tags `v*`. Un merge a `develop`/`main` **no despliega nada** por sí solo.
 - **`GOOGLE_SERVICES_JSON_B64` debe ser base64 de una sola línea.** Recréalo con `base64 -i consumerApp/google-services.json | tr -d '\n' | gh secret set GOOGLE_SERVICES_JSON_B64`; el pipeline hace `tr -d '[:space:]'` y valida el JSON, y aborta si no parsea.
 - **Keystore = upload key de Play.** `SIGNING_*` debe coincidir con la upload key del Play Console; si no, la AAB se rechaza con `DEVELOPER_ERROR` (rompe IAP/license-tester).

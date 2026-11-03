@@ -1,0 +1,26 @@
+name: harness-ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: shellcheck
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq shellcheck
+          shellcheck scripts/*.sh tests/*.sh plugins/sdd-flow/scripts/*.sh plugins/sdd-flow/scaffold/scripts/sdd/*.sh
+
+      - name: hooks compile
+        run: python3 -m py_compile plugins/sdd-flow/hooks/*.py
+
+      - name: render is up to date
+        run: ./scripts/render.sh --check
+
+      - name: tests
+        run: ./tests/run-tests.sh

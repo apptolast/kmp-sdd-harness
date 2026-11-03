@@ -1,13 +1,13 @@
 {
-  "description": "sdd-flow: PreToolUse bloquea editar tests durante /implement (lock TDD fase 1). PostToolUse captura fallos de build/test a engram (memoria viva).",
+  "description": "sdd-flow: PreToolUse bloquea comandos de dispositivo/emulador/simulador y tests instrumentados sin aprobación (regla de oro 8). PostToolUse captura fallos de build/test a engram (memoria viva).",
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Edit|Write|MultiEdit",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/block-test-edits.py\"",
+            "command": "python3 \"${CLAUDE_PLUGIN_ROOT}/hooks/require-device-approval.py\"",
             "timeout": 10
           }
         ]
