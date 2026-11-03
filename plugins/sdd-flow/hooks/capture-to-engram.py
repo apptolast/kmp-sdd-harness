@@ -1,45 +1,53 @@
 #!/usr/bin/env python3
-"""PostToolUse hook (sdd-flow): capture raw learnings to engram (living memory).
+"""PostToolUse hook (sdd-flow): capture failed builds and tests to engram (living memory).
 
-Conservative, low-noise: only fires when a Gradle build/test command FAILS.
-That is exactly the "errores + solucion" trail the SDD design wants, without
-drowning engram in every tool call. Rich, curated notes are written by the
-subagents via the engram MCP and distilled by /promote (D6).
+Conservative, low-noise: fires only when a Gradle verification command FAILS — run directly or
+through scripts/sdd/gradle-signal.sh. That is the "error + fix" trail /sdd-flow:promote distills,
+without drowning engram in every tool call. Curated notes are written by the converge agent and by
+/sdd-flow:promote.
 
-Never writes secrets: it only stores the command and a bounded output tail.
-Best-effort: any error -> silent no-op. Always exits 0.
+The feature is identified by the git branch (feature/<JIRA-ID>-...), so there is no state file.
+Never writes secrets: only the command and a bounded tail of the output. Best-effort: any error is a
+silent no-op. Always exits 0.
 """
-import sys
-import os
 import json
+import os
 import shutil
 import subprocess
+import sys
+
+VERIFY_WORDS = ("test", "Test", "check", "Check", "ktlint", "detekt", "compile", "Compile", "assemble", "link")
 
 
-def load_state(cwd):
-    for base in (os.environ.get("CLAUDE_PROJECT_DIR"), cwd, os.getcwd()):
-        if not base:
-            continue
-        p = os.path.join(base, ".claude", ".sdd-state.json")
-        if os.path.exists(p):
-            try:
-                with open(p) as f:
-                    return json.load(f)
-            except Exception:
-                return {}
-    return {}
+def project_dir(data):
+    return os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd()
+
+
+def git_branch(cwd):
+    try:
+        out = subprocess.run(
+            ["git", "-C", cwd, "rev-parse", "--abbrev-ref", "HEAD"],
+            capture_output=True, text=True, timeout=3,
+        )
+        return out.stdout.strip() or "?"
+    except Exception:
+        return "?"
 
 
 def extract_output(resp):
     if isinstance(resp, dict):
-        parts = []
-        for k in ("stdout", "stderr", "output", "content", "result"):
-            v = resp.get(k)
-            if isinstance(v, str):
-                parts.append(v)
+        parts = [resp.get(k) for k in ("stdout", "stderr", "output", "content", "result")]
         code = resp.get("exit_code", resp.get("exitCode"))
-        return "\n".join(parts), code
+        return "\n".join(p for p in parts if isinstance(p, str)), code
     return str(resp or ""), None
+
+
+def failed(out, code):
+    if code not in (0, None):
+        return True
+    if "gradle-signal: FAILED" in out or "BUILD FAILED" in out:
+        return True
+    return False
 
 
 def main():
@@ -48,30 +56,24 @@ def main():
     except Exception:
         return
 
-    tool_input = data.get("tool_input", {}) or {}
-    cmd = tool_input.get("command", "") or ""
-    # only Gradle verification commands
-    if "gradlew" not in cmd or not any(k in cmd for k in ("test", "Test", "check", "ktlint")):
+    cmd = (data.get("tool_input") or {}).get("command") or ""
+    if not ("gradlew" in cmd or "gradle-signal" in cmd):
+        return
+    if not any(w in cmd for w in VERIFY_WORDS):
         return
 
     resp = data.get("tool_response") or data.get("tool_result") or data.get("tool_output")
     out, code = extract_output(resp)
-    failed = (code not in (0, None)) or ("BUILD FAILED" in out) or (
-        "FAILED" in out and "BUILD SUCCESSFUL" not in out)
-    if not failed:
+    if not failed(out, code) or not shutil.which("engram"):
         return
 
-    if not shutil.which("engram"):
-        return
+    cwd = project_dir(data)
+    project = os.path.basename(cwd.rstrip("/")) or "unknown"
+    branch = git_branch(cwd)
 
-    state = load_state(tool_input.get("cwd") or data.get("cwd"))
-    spec = state.get("spec", "?")
-    phase = state.get("phase", "?")
-    project = state.get("project") or os.path.basename(os.environ.get("CLAUDE_PROJECT_DIR", "") or os.getcwd()) or "unknown"
-
-    tail = "\n".join(out.strip().splitlines()[-18:])[:1400]
-    title = f"[auto] Fallo build/test — spec {spec} (fase {phase})"
-    msg = f"Comando: {cmd}\nFase: {phase} | Spec: {spec}\nSalida (cola):\n{tail}"
+    tail = "\n".join(out.strip().splitlines()[-25:])[:1800]
+    title = f"[auto] Fallo de build/test — {branch}"
+    msg = f"Comando: {cmd[:300]}\nRama: {branch}\nSalida (cola):\n{tail}"
 
     try:
         subprocess.run(
