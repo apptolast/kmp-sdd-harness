@@ -63,6 +63,10 @@ claude plugin install sdd-flow@kmp-sdd-harness
 claude plugin install kmp-recipes@kmp-sdd-harness
 ```
 
+`sdd-flow` instala `android-skills` como dependencia. Si vienes de sdd-flow 0.2.x y actualizas desde la
+shell (`claude plugin update`), instala la dependencia una vez con
+`claude plugin install android-skills@kmp-sdd-harness`; si no, sdd-flow no carga.
+
 Después, en el repo del proyecto:
 
 ```

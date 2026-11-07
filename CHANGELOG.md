@@ -14,6 +14,12 @@ versiones SemVer. `/sdd-flow:init` escribe la versión del plugin en `.claude/sd
   abre un PR cuando Google publica una versión nueva.
 - Pautas para aplicar `android-skills:*` en KMP en la skill `kmp-platform-code`.
 
+### Actualizar desde 0.2.x
+- `claude plugin update` desde la shell sube sdd-flow a 0.3.0 pero no instala la dependencia nueva, y
+  sdd-flow queda en «failed to load» hasta que se instala. Hazlo una vez:
+  `claude plugin install android-skills@kmp-sdd-harness`. Con el auto-update del marketplace activo, o
+  con `/reload-plugins` en una sesión, Claude Code la instala solo.
+
 ### Cambiado
 - La regla de oro 7 (`reglas.md`), la escalera de reutilización de los agentes y el inventario de
   `define` citan `android-skills:*`. `kmp-compose-rules` remite a `android-skills:edge-to-edge`.
