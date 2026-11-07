@@ -1,6 +1,11 @@
 {
   "name": "sdd-flow",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Flujo SDD (Spec-Driven Development) para proyectos KMP/CMP de AppToLast: define 🚦 → tasks 🚦 → implement (TDD por tarea) → converge → PR 🚦, más change y promote. Evaluación de diseño con refactors R#, journal.md, spec-lint, gradle-signal, hook de aprobación para dispositivos y captura a engram.",
-  "author": { "name": "AppToLast" }
+  "author": {
+    "name": "AppToLast"
+  },
+  "dependencies": [
+    "android-skills"
+  ]
 }

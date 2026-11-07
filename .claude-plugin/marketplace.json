@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "kmp-sdd-harness",
-  "description": "Harness SDD reutilizable para proyectos KMP de AppToLast: flujo define → tasks → implement (TDD) → converge → PR con gates humanos, evaluación de diseño y trazabilidad AC↔tarea, más un recetario canónico de integraciones.",
+  "description": "Harness SDD reutilizable para proyectos KMP de AppToLast: flujo define → tasks → implement (TDD) → converge → PR con gates humanos, evaluación de diseño y trazabilidad AC↔tarea, un recetario canónico de integraciones y las skills oficiales de Android de Google.",
   "owner": {
     "name": "AppToLast"
   },
@@ -22,6 +22,22 @@
         "name": "AppToLast"
       },
       "source": "./plugins/kmp-recipes",
+      "category": "development"
+    },
+    {
+      "name": "android-skills",
+      "description": "Skills oficiales de Google para Android (github.com/android/skills), fijadas a una versión revisada. Dependencia de sdd-flow; las pautas para usarlas en KMP están en la skill sdd-flow:kmp-platform-code.",
+      "author": {
+        "name": "Google / Android"
+      },
+      "source": {
+        "source": "github",
+        "repo": "android/skills",
+        "ref": "v1.0.20",
+        "sha": "bf68e2d66a992a1e6aeb7e9263293cc23fcbf475"
+      },
+      "homepage": "https://github.com/android/skills",
+      "license": "Apache-2.0",
       "category": "development"
     }
   ]

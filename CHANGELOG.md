@@ -3,6 +3,22 @@
 Cambios notables del harness. Formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
 versiones SemVer. `/sdd-flow:init` escribe la versión del plugin en `.claude/sdd/VERSION` del proyecto.
 
+## [0.3.0] — 2026-11-07
+
+### Añadido
+- Plugin **android-skills** en el marketplace: las skills oficiales de Google
+  ([android/skills](https://github.com/android/skills), Apache-2.0) fijadas a `v1.0.20` por tag y sha.
+  sdd-flow lo declara como dependencia, así que llega a todos los proyectos que usan sdd-flow, también
+  a los ya creados, en su siguiente actualización del marketplace.
+- `scripts/bump-android-skills.sh` (`--check` / `--apply`) y el workflow semanal `bump-android-skills`, que
+  abre un PR cuando Google publica una versión nueva.
+- Pautas para aplicar `android-skills:*` en KMP en la skill `kmp-platform-code`.
+
+### Cambiado
+- La regla de oro 7 (`reglas.md`), la escalera de reutilización de los agentes y el inventario de
+  `define` citan `android-skills:*`. `kmp-compose-rules` remite a `android-skills:edge-to-edge`.
+- Ya no se da por hecho que las skills de Google estén en `~/.claude/skills`.
+
 ## [0.2.0] — 2026-11-03
 
 El flujo se rehace siguiendo android-sdd-harness (revisado tras uso real) y se adapta a KMP.

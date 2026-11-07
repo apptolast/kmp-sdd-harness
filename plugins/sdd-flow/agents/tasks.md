@@ -21,8 +21,9 @@ Para en el primer peldaño que se sostenga. Casi todo el trabajo para pronto.
    (`R#`).
 2. **¿Ya está en el código?** Lee el código que toca el cambio y busca antes de añadir. Reutiliza o
    extiende el componente existente.
-3. **¿Hay receta o aprendizaje?** Una skill de `kmp-recipes` o una observación de engram
-   (`mem_search`) que ya resuelva esto en la flota.
+3. **¿Hay receta o aprendizaje?** Una skill de `kmp-recipes`, una skill de Google `android-skills:*`
+   (pautas KMP en `sdd-flow:kmp-platform-code`) o una observación de engram (`mem_search`) que ya
+   resuelva esto en la flota.
 4. **¿Lo hace ya la plataforma, la stdlib o una dependencia instalada?** (Compose, Koin, Ktor,
    kotlinx-*, la librería de la integración).
 5. **¿Cabe en una línea que se entienda de un vistazo?**

@@ -31,6 +31,9 @@ legible por quien lo implementa.
      transversal); cita las observaciones por id.
    - **kmp-recipes**: las skills del recetario que apliquen (RevenueCat, Firebase-REST, auth,
      navegación, i18n, theming, testing…). Cita la skill.
+   - **android-skills**: si el cambio toca `androidMain`, `androidApp` o la UI común, la skill de Google
+     que aplique (`android-skills:edge-to-edge`, `r8-analyzer`…), con las pautas KMP de
+     `sdd-flow:kmp-platform-code`. Cita la skill.
 4. **Diseño visual.** Si la feature toca UI, busca en el repo el `.pen` (Pencil) de cada pantalla. Si
    falta, regístralo como decisión `D#` («diseñar <pantalla> en Pencil antes de implementarla»); `tasks`
    lo convertirá en una tarea con gate. El `.pen` es la especificación visual; el Compose se escribe a

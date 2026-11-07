@@ -28,6 +28,7 @@ engram, kmp-recipes y Jira.
 |---|---|
 | **sdd-flow** | 5 subagentes y sus comandos (`/sdd-flow:define`, `tasks`, `implement`, `change`, `converge`), `/sdd-flow:promote` y `/sdd-flow:init`; un hook que bloquea el trabajo con dispositivo sin aprobación, otro que captura fallos de build en engram, y las skills `verify-on-device`, `kmp-compose-rules`, `kmp-testing-rules` y `kmp-platform-code`. |
 | **kmp-recipes** | Recetario canónico de integraciones KMP (RevenueCat, Firebase-REST, auth Google/Apple, fastlane, navegación, i18n, WebView, testing…), sembrado desde proyectos existentes. |
+| **android-skills** | Las skills oficiales de Google para Android ([android/skills](https://github.com/android/skills), Apache-2.0), fijadas a una versión revisada. Se instala como dependencia de sdd-flow. |
 
 ## Qué se obtiene
 
@@ -84,9 +85,13 @@ rellenar y se ofrece a rellenarlos auditando el proyecto. Ejecútalo otra vez de
 - `python3` (hooks), `bash`, `git` y `gh` (para el PR).
 - Opcional: MCP de Atlassian (para leer el ticket de Jira en `define`) y Pencil (diseños `.pen`).
 
-Las skills de Google instaladas en `~/.claude/skills` (`edge-to-edge`, `navigation-3`, `r8-analyzer`,
-`agp-9-upgrade`, `play-billing-library-version-upgrade`…) aplican a `androidMain` y a la UI común; el
-harness no las duplica.
+Las skills oficiales de Android de Google llegan con el plugin **android-skills**: el marketplace lo
+referencia en github.com/android/skills, fijado a un tag y un sha, y sdd-flow lo declara como dependencia,
+así que se instala solo con sdd-flow (`android-skills:edge-to-edge`, `android-skills:r8-analyzer`…). Las
+pautas para aplicarlas en KMP están en la skill `sdd-flow:kmp-platform-code`. El workflow
+`bump-android-skills` abre cada semana un PR si Google publica una versión nueva
+(`./scripts/bump-android-skills.sh --check` lo comprueba en local). Si tenías copias en `~/.claude/skills`,
+bórralas: quedarían duplicadas y desfasadas.
 
 ## Desarrollar el harness
 

@@ -53,6 +53,39 @@ done
 v_plugin="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["version"])' "$PLUGIN/.claude-plugin/plugin.json")"
 contains "VERSION matches sdd-flow plugin.json" "$v_plugin" "$(cat "$HERE/VERSION")"
 
+# android-skills: Google's plugin, pinned by tag + sha, and a dependency of sdd-flow.
+check "android-skills is pinned to a vX.Y.Z tag and a full sha" python3 -c '
+import json, re, sys
+src = [p for p in json.load(open(sys.argv[1]))["plugins"] if p["name"] == "android-skills"][0]["source"]
+assert src["source"] == "github" and src["repo"] == "android/skills", src
+assert re.fullmatch(r"v\d+\.\d+\.\d+", src["ref"]), src
+assert re.fullmatch(r"[0-9a-f]{40}", src["sha"]), src
+' "$HERE/.claude-plugin/marketplace.json"
+check "sdd-flow depends on android-skills" python3 -c '
+import json, sys
+assert "android-skills" in json.load(open(sys.argv[1])).get("dependencies", [])
+' "$PLUGIN/.claude-plugin/plugin.json"
+
+BUMP="$HERE/scripts/bump-android-skills.sh"
+cp "$HERE/.claude-plugin/marketplace.json" "$WORK/marketplace.json"
+pinned="$(python3 -c '
+import json, sys
+s = [p for p in json.load(open(sys.argv[1]))["plugins"] if p["name"] == "android-skills"][0]["source"]
+print(s["ref"], s["sha"])
+' "$WORK/marketplace.json")"
+newer="v99.0.0 0123456789abcdef0123456789abcdef01234567"
+check "bump --check passes when the pin is current" \
+  env MARKETPLACE="$WORK/marketplace.json" ANDROID_SKILLS_LATEST="$pinned" "$BUMP" --check
+check_fails "bump --check fails when upstream is newer" \
+  env MARKETPLACE="$WORK/marketplace.json" ANDROID_SKILLS_LATEST="$newer" "$BUMP" --check
+out="$(MARKETPLACE="$WORK/marketplace.json" ANDROID_SKILLS_LATEST="$newer" "$BUMP" --apply 2>&1)"
+contains "bump --apply prints the new tag" "v99.0.0" "$out"
+contains "bump --apply rewrites the sha" "0123456789abcdef0123456789abcdef01234567" "$(cat "$WORK/marketplace.json")"
+out="$(MARKETPLACE="$WORK/marketplace.json" ANDROID_SKILLS_LATEST="$newer" "$BUMP" --apply 2>&1)"
+[ -z "$out" ] && ok "bump --apply is silent when already current" || bad "bump --apply is silent when already current" "$out"
+check_fails "bump rejects a malformed sha" \
+  env MARKETPLACE="$WORK/marketplace.json" ANDROID_SKILLS_LATEST="v99.0.1 nope" "$BUMP" --check
+
 # ------------------------------------------------------------------------------------------- init
 echo "init"
 REPO="$WORK/repo"

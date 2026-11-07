@@ -1,0 +1,47 @@
+name: bump-android-skills
+
+# Weekly: if github.com/android/skills published a newer vX.Y.Z, open a PR that moves the pinned
+# ref/sha of the android-skills entry in .claude-plugin/marketplace.json. A human reviews the upstream
+# release notes and merges; projects receive it on their next marketplace update.
+#
+# Requires "Allow GitHub Actions to create and approve pull requests" in the repository settings.
+# PRs opened with GITHUB_TOKEN do not trigger other workflows: re-run harness-ci on the PR by hand.
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bump pin and open PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.repository.default_branch }}
+        run: |
+          tag="$(./scripts/bump-android-skills.sh --apply)"
+          if [ -z "$tag" ]; then
+            echo "android-skills is up to date"
+            exit 0
+          fi
+          branch="chore/android-skills-$tag"
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            echo "$branch already exists; nothing to do"
+            exit 0
+          fi
+          git switch -c "$branch"
+          git -c user.name="github-actions[bot]" \
+              -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+              commit -am "build(android-skills): pin android/skills $tag"
+          git push origin "$branch"
+          gh pr create --base "$BASE" --head "$branch" \
+            --title "build(android-skills): pin android/skills $tag" \
+            --body "Sube la versión fijada de \`android-skills\` a [$tag](https://github.com/android/skills/releases/tag/$tag). Revisa las release notes antes del merge: los proyectos la reciben en su siguiente \`claude plugin marketplace update kmp-sdd-harness\`."
