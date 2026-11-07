@@ -29,3 +29,18 @@ probando, no en compilación en el que sí.
 - **Verificación**: compilar todos los targets afectados es el check rápido. Lo que necesite un
   dispositivo se propone con el comando exacto y se ejecuta solo con aprobación (skill
   `verify-on-device`).
+
+## Skills de Google (`android-skills:*`) en KMP
+
+sdd-flow instala como dependencia el plugin `android-skills` (github.com/android/skills, versión fijada
+en el marketplace). Son recetas oficiales y al día para Android: úsalas antes que tu memoria cuando el
+trabajo toque `androidMain`, `androidApp` o la UI común, con estos matices:
+
+| Skill | Cómo aplicarla en KMP |
+|---|---|
+| `agp-9-upgrade` | Pensada para apps Android puras: el módulo KMP usa `com.android.kotlin.multiplatform.library` (source sets `androidMain`/`androidHostTest`/`androidDeviceTest`); aplica sus pasos al módulo de app y a la configuración de Gradle. |
+| `navigation-3` | Solo si el proyecto ha adoptado Navigation 3 (mira sus ADR); muchos usan Navigation Compose 2.x con rutas `@Serializable`. |
+| `edge-to-edge`, `adaptive`, `jetpack-compose-performance` | `enableEdgeToEdge()` y lo de la `Activity` van en `androidApp`/`androidMain`; antes de llevar un API a `commonMain`, comprueba que existe en Compose Multiplatform. |
+| `r8-analyzer`, `play-billing-library-version-upgrade`, `play-policy-insights`, `android-intent-security`, `android-permissions-security`, `anr-audit-and-fix`, `testing-setup` | Solo `androidMain`/`androidApp` y su build; los tests comunes siguen en `commonTest` (skill `kmp-testing-rules`). |
+| `android-cli`, `android-profiler` | Lo que toque un dispositivo (los subcomandos `emulator`, `install`, `run`, `screen` y `layout`, o grabar una traza) necesita la aprobación del usuario para esa ejecución (regla de oro 8; el hook lo bloquea). `android docs`, `android describe` y analizar una traza que ya existe, no. |
+| Wear, TV, XR, coches, Glance, Ink, cámara, media3, IA en dispositivo | Solo si el proyecto apunta a esa superficie. |

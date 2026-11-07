@@ -19,9 +19,10 @@ Cómo se trabaja en este repositorio. Los hechos del proyecto y los comandos est
    frameworks de iOS). Regenéralo.
 6. **Arregla causas, no síntomas.** No apiles parches. Un cambio estructural pasa por el gate de `define`
    como refactor aprobado (`R#`) o por `change`; nunca en silencio.
-7. **Reutiliza antes de construir.** ¿Necesita existir → ya está aquí → hay receta en kmp-recipes o
-   aprendizaje en engram → lo hace la plataforma o una dependencia → cabe en una línea → si no, lo
-   mínimo? Solo recorta alcance: nunca validación, manejo de errores, seguridad, accesibilidad ni i18n.
+7. **Reutiliza antes de construir.** ¿Necesita existir → ya está aquí → hay receta en kmp-recipes, skill
+   de Google (`android-skills:*`, pautas KMP en `sdd-flow:kmp-platform-code`) o aprendizaje en engram →
+   lo hace la plataforma o una dependencia → cabe en una línea → si no, lo mínimo? Solo recorta
+   alcance: nunca validación, manejo de errores, seguridad, accesibilidad ni i18n.
 8. **Primero la evidencia barata; el dispositivo necesita un sí.** Código, luego un test en
    `commonTest` o una `@Preview`, luego preguntar. Nunca arranques un emulador o un simulador, instales
    o manejes la app, ni ejecutes tests instrumentados sin la aprobación explícita del usuario para esa

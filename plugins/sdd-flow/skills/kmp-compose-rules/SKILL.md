@@ -26,7 +26,7 @@ Si la pantalla tiene un `.pen` de Pencil, es la especificación visual: síguelo
   con datos realistas. Varias previews si hay estados distintos (cargando, vacío, error, con datos). Las
   previews no tocan DI, red ni código de plataforma.
 - **Insets y teclado**: `imePadding()` antes de `verticalScroll` en la cadena de modifiers. En Android,
-  sigue la skill de Google `edge-to-edge` para las barras de sistema.
+  sigue la skill de Google `android-skills:edge-to-edge` para las barras de sistema.
 - **Listas**: `LazyColumn`/`LazyRow` con `key` estables.
 - **Accesibilidad**: `contentDescription` (externalizada) en cada icono accionable; áreas táctiles de al
   menos 48 dp.
