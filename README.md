@@ -27,7 +27,7 @@ engram, kmp-recipes y Jira.
 | Plugin | Qué aporta |
 |---|---|
 | **sdd-flow** | 5 subagentes y sus comandos (`/sdd-flow:define`, `tasks`, `implement`, `change`, `converge`), `/sdd-flow:promote` y `/sdd-flow:init`; un hook que bloquea el trabajo con dispositivo sin aprobación, otro que captura fallos de build en engram, y las skills `verify-on-device`, `kmp-compose-rules`, `kmp-testing-rules` y `kmp-platform-code`. |
-| **kmp-recipes** | Recetario canónico de integraciones KMP (RevenueCat, Firebase-REST, auth Google/Apple, fastlane, navegación, i18n, WebView, testing…), sembrado desde proyectos existentes. |
+| **kmp-recipes** | Recetario canónico de integraciones KMP (RevenueCat, Firebase-REST, auth Google/Apple, sesión REST con refresco rotatorio, fastlane, navegación, i18n, WebView, testing, tests de UI de Compose en iOS…), sembrado desde proyectos existentes. |
 | **android-skills** | Las skills oficiales de Google para Android ([android/skills](https://github.com/android/skills), Apache-2.0), fijadas a una versión revisada. Se instala como dependencia de sdd-flow. |
 
 ## Qué se obtiene

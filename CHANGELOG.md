@@ -3,6 +3,37 @@
 Cambios notables del harness. Formato [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/);
 versiones SemVer. `/sdd-flow:init` escribe la versión del plugin en `.claude/sdd/VERSION` del proyecto.
 
+## [0.4.0] — 2026-11-17
+
+### Añadido
+- `kmp-compose-rules`: sección «Pantallas adaptativas (móvil y tableta)». Cada pantalla se diseña, se
+  implementa y se prueba en móvil y en tableta, en vertical y en horizontal, salvo que un ADR diga otra cosa:
+  - clases de anchura de Material 3 como tokens del tema;
+  - `BoxWithConstraints` para el espacio de una región y `currentWindowAdaptiveInfo()` para las decisiones de
+    ventana, nunca la plataforma, el modelo ni la orientación;
+  - patrones (formulario con ancho máximo, `GridCells.Adaptive`, `NavigationSuiteScaffold`, lista-detalle con
+    Navigation 3 o con `ListDetailPaneScaffold`) y estado que sobrevive al giro;
+  - previews de móvil y de tableta en las dos orientaciones, la elección de disposición testeada en
+    `commonTest` y la semántica en `iosTest` a dos anchos.
+- kmp-recipes 0.2.0, con dos recetas:
+  - `auth/rest-rotating-refresh-session`: sesión de dispositivo contra un backend REST con acceso corto y
+    refresco rotatorio. Plugin propio de Ktor en vez de `Auth { bearer }`, renovación de un solo vuelo,
+    arranque optimista, cierre que revoca con un acceso vigente, almacén cifrado (Android Keystore, iOS
+    Keychain) y tests con `MockEngine` en tiempo virtual.
+  - `testing/compose-ui-ios`: tests de UI de Compose Multiplatform en `iosTest` con `ui-test` (v2), 48 dp
+    medidos sobre el nodo, texto al 200 %, móvil y tableta, capturas PNG para un PR, y los gotchas del Keychain
+    en los tests de iOS y del APK de tests instrumentados con AGP 9.
+
+### Cambiado
+- `kmp-platform-code`: `adaptive` tiene fila propia en la tabla de skills de Google, con sus matices en KMP
+  (Navigation Compose 2, el `adaptive` de JetBrains, y `MediaQuery`, `Grid` y `FlexBox` solo si existen en CMP).
+- kmp-recipes pasa de 0.1.0 a 0.2.0: la caché de plugins de Claude Code va por versión, y sin subirla un
+  proyecto no recibe las recetas nuevas.
+
+### Actualizar un proyecto
+- `claude plugin marketplace update kmp-sdd-harness`. No hace falta `/sdd-flow:init`: no cambia nada de lo que
+  se copia a los proyectos.
+
 ## [0.3.0] — 2026-11-07
 
 ### Añadido
