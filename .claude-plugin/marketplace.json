@@ -33,8 +33,8 @@
       "source": {
         "source": "github",
         "repo": "android/skills",
-        "ref": "v1.0.20",
-        "sha": "bf68e2d66a992a1e6aeb7e9263293cc23fcbf475"
+        "ref": "v1.0.24",
+        "sha": "7f7b21730a605d112ca9f79b6e40105ce7b670ee"
       },
       "homepage": "https://github.com/android/skills",
       "license": "Apache-2.0",
